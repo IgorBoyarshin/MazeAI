@@ -7,6 +7,6 @@ public class MazeWalkerMaze {
     private MazeWalkerTile[][] field;
 
     public MazeWalkerMaze() {
-        field = new MazeWalkerTile[][];
+//        field = new MazeWalkerTile[][];
     }
 }
