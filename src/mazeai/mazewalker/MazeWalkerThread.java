@@ -56,6 +56,6 @@ public class MazeWalkerThread extends Thread {
     }
 
     private Situation getCurrentSituation() {
-
+        return null;
     }
 }
