@@ -42,11 +42,12 @@ public class MazeGame {
         mazeWalker = new MazeWalker(maze);
         String path = mazeWalker.generatePath();
 
-        if (isPathValid(path)) {
-            return path;
-        } else {
-            return "NO SOLUTION WAS FOUND";
-        }
+        return path;
+//        if (isPathValid(path)) {
+//            return path;
+//        } else {
+//            return "NO SOLUTION WAS FOUND";
+//        }
     }
 
     public boolean isPathValid(String path) {

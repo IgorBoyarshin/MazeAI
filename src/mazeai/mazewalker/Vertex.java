@@ -13,21 +13,21 @@ public class Vertex {
         links = new ArrayList<Vertex>();
     }
 
-//    public void addLink(Vertex vertex, String path) {
-//        links.add(new Link(vertex, path));
-//    }
-//
-//    public int getVerticesAmount() {
-//        return links.size();
-//    }
-//
-//    public Vertex getVertex(int index) {
-//        if ((index >= 0) && (index < links.size())) {
-//            return links.get(index).getVertex();
-//        } else {
-//            return null;
-//        }
-//    }
+    public void addChild(Vertex vertex) {
+        links.add(vertex);
+    }
+
+    public Vertex getChild(int index) {
+        if ((index >= 0) && (index < links.size())) {
+            return links.get(index);
+        } else {
+            return null;
+        }
+    }
+
+    public int getChildrenAmount() {
+        return links.size();
+    }
 //
 //    public String getPathToVertex(int index) {
 //        if ((index >= 0) && (index < links.size())) {

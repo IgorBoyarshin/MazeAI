@@ -4,3 +4,5 @@ Have a list of all Vertices of layer(i), sequentially make work for each of them
 That way I eliminate re-calculation problems, because the children have not started yet, because I have not finished
 current layer(i).
 Try it!
+
+david guetta - little bad girl

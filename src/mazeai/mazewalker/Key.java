@@ -26,4 +26,8 @@ public class Key {
     public String getValue() {
         return value;
     }
+
+    public void setNewValue(String newValue) {
+        this.value = newValue;
+    }
 }
