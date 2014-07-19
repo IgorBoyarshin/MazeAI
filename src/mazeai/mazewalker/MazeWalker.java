@@ -37,6 +37,11 @@ public class MazeWalker {
         Wisely update graph's links based on results.
          */
 
+        // Launching threads for children of Finish( first layer )
+        for (int i = 0; i < graph.getFinish().getVerticesAmount(); i++) {
+            MazeThread mainThread = new MazeThread(graph.getFinish(), graph.getFinish().getVertex(i));
+        }
+
         return path;
     }
 
@@ -46,20 +51,4 @@ public class MazeWalker {
 
         join children
      */
-    class MazeThread extends Thread {
-        private Link link;
-        private Vertex parent;
-
-        public MazeThread(Vertex parent, Link link) {
-            this.link = link;
-            this.parent = parent;
-        }
-
-        @Override
-        public void run() {
-            for (int i = 0; i < link.getVertex().getVerticesAmount(); i++) {
-                if (link.getVertex() != )
-            }
-        }
-    }
 }

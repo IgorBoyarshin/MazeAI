@@ -16,6 +16,10 @@ public class Link {
         return path;
     }
 
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     public Vertex getVertex() {
         return vertex;
     }

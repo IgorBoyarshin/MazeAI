@@ -36,4 +36,22 @@ public class Vertex {
             return null;
         }
     }
+
+    public void setPathToVertex(int index, String path) {
+        if ((index >= 0) && (index < links.size())) {
+            links.get(index).setPath(path);
+        }
+    }
+
+    public Link getLink(int index) {
+        if ((index >= 0) && (index < links.size())) {
+            return links.get(index);
+        } else {
+            return null;
+        }
+    }
+
+    public void addLink(Link link) {
+        links.add(link);
+    }
 }
