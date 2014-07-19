@@ -38,6 +38,7 @@ public class MazeWalker {
          */
 
         // Launching threads for children of Finish( first layer )
+        graph.getFinish().setThread(null);
         for (int i = 0; i < graph.getFinish().getVerticesAmount(); i++) {
             MazeThread mainThread = new MazeThread(graph.getFinish(), graph.getFinish().getVertex(i));
         }

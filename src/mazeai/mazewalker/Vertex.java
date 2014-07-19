@@ -8,9 +8,19 @@ import java.util.List;
  */
 public class Vertex {
     private List<Link> links;
+    private MazeThread thread; // aka "how to find me(Thread)"
 
     public Vertex() {
         links = new ArrayList<Link>();
+        thread = null;
+    }
+
+    public MazeThread getThread() {
+        return thread;
+    }
+
+    public void setThread(MazeThread thread) {
+        this.thread = thread;
     }
 
     public void addLink(Vertex vertex, String path) {

@@ -1,5 +1,8 @@
 package mazeai.mazewalker;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Igor on 19.07.2014 at 12:13.
  */
@@ -9,15 +12,27 @@ public class MazeThread extends Thread {
     private Vertex thisVertex;
 
     private static Graph graph;
+    private static List<MazeThread> threads = new ArrayList<MazeThread>();
+
+    private boolean spread;
+    private List<MazeThread> children;
 
     public MazeThread(Vertex parent, Vertex thisVertex) {
 //        this.link = link;
         this.parent = parent;
         this.thisVertex = thisVertex;
+//        this.thisVertex.setThread(this);
+        threads.add(this);
+        spread = true;
+        children = new ArrayList<MazeThread>();
     }
 
     public static void setGraph(Graph g) {
         graph = g;
+    }
+
+    public void stopFurtherSpreading() {
+        spread = false;
     }
 
     private String calcPathToFinish() {
@@ -43,6 +58,38 @@ public class MazeThread extends Thread {
 
         String calculatedPathToFinish = parent.getPathToVertex(indexFinish) + parent.getPathToVertex(indexThis);
         return calculatedPathToFinish;
+    }
+
+    // Called when recalculation required. When parent's path has changed
+    public void reprocessChildren() {
+        System.out.println("Relaunching children for a dead thread");
+
+        // Clearing all previous children and preventing them from spreading
+        for (MazeThread child : children) {
+            child.stopFurtherSpreading();
+        }
+        children = new ArrayList<MazeThread>();
+
+        // Launching new children, with proper parent path
+        launchChildren();
+    }
+
+    // Waiting removed
+    private void launchChildren() {
+        for (int i = 0; i < thisVertex.getVerticesAmount(); i++) {
+            if ((thisVertex.getLink(i).getVertex() != parent)
+                    && (thisVertex.getLink(i).getVertex() != graph.getFinish())) {
+
+                MazeThread childThread = new MazeThread(thisVertex, thisVertex.getLink(i).getVertex());
+                children.add(childThread);
+                childThread.start();
+//                try {
+//                    childThread.join(4000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+            }
+        }
     }
 
     /*
@@ -80,9 +127,13 @@ public class MazeThread extends Thread {
                 // Our path is shorter
 
                 thisVertex.setPathToVertex(index, calculatedPathToFinish);
+
+                // If there is a Thread operating further with old, wrong path, relaunch it!
+                if (thisVertex.getThread() != null) {
+                    thisVertex.getThread().stopFurtherSpreading();
+                }
             }
 
-            // TODO: check for shortest, as described at the bottom.
             // TERMINATE
             return;
 
@@ -92,29 +143,22 @@ public class MazeThread extends Thread {
             thisVertex.addLink(new Link(graph.getFinish(), calculatedPathToFinish));
         }
 
+        // Mark that we've been here, so that later Threads can call us for relaunching our children
+        // We do it here because before we needed to know if there was smbd else
+        thisVertex.setThread(this);
+
         if (thisVertex.equals(graph.getStart())) {
             // TERMINATE
             return;
         }
 
-        // TODO: why do I need to wait for children??
 
-        // If no termination then continue spreading
-        for (int i = 0; i < thisVertex.getVerticesAmount(); i++) {
-            if (thisVertex.getLink(i).getVertex() != parent) {
-                MazeThread childThread = new MazeThread(thisVertex, thisVertex.getLink(i).getVertex());
-                childThread.start();
-                try {
-                    childThread.join(4000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+        if (spread) {
+            // If no termination then continue spreading
+            launchChildren();
         }
+
+        // TERMINATE
+        return;
     }
 }
-/*
-    TODO:
-    What if I came, assigned new shorter path, but the previous Thread has already gone with old, wrong path.
-    Shortest path is now not guaranteed!!!
- */
