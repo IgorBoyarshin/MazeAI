@@ -17,7 +17,7 @@ public class MazeGame {
     private final int defaultMazeHeight = 5;
 
     private Maze maze;
-//    private MazeWalker mazeWalker;
+    private MazeWalker mazeWalker;
 
     public MazeGame() {
         maze = new Maze(defaultMazeWidth, defaultMazeHeight);
@@ -39,15 +39,14 @@ public class MazeGame {
     }
 
     public String getSolution() {
-//        mazeWalker = new MazeWalker(maze);
-//        String path = mazeWalker.generatePath();
-//
-//        if (isPathValid(path)) {
-//            return path;
-//        } else {
-//            return "NO SOLUTION WAS FOUND";
-//        }
-        return "";
+        mazeWalker = new MazeWalker(maze);
+        String path = mazeWalker.generatePath();
+
+        if (isPathValid(path)) {
+            return path;
+        } else {
+            return "NO SOLUTION WAS FOUND";
+        }
     }
 
     public boolean isPathValid(String path) {
