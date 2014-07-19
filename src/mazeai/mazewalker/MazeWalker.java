@@ -42,6 +42,7 @@ public class MazeWalker {
             layer.add(graph.getFinish().getLink(i));
         }
 
+
         return "";
     }
 }
