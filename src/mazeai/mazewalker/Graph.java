@@ -9,13 +9,22 @@ public class Graph {
     private Vertex start;
     private Vertex finish;
 
-    // all verts
-    // each vert has some links containing paths
-    // when I find new way, I add a new link with path
     private List<Vertex> vertices;
 
     public Graph() {
 
+    }
+
+    public String getPathFromStartToFinish() {
+        int index = 0;
+        while (!start.getVertex(index).equals(finish)) {
+            index++;
+            if (index >= start.getVerticesAmount()) {
+                return null;
+            }
+        }
+
+        return start.getPathToVertex(index);
     }
 
     // TODO: finish if necessary

@@ -56,7 +56,7 @@ public class MazeThread extends Thread {
         }
         // Found needed Vertices in Parent
 
-        String calculatedPathToFinish = parent.getPathToVertex(indexFinish) + parent.getPathToVertex(indexThis);
+        String calculatedPathToFinish = parent.getPathToVertex(indexThis) + parent.getPathToVertex(indexFinish);
         return calculatedPathToFinish;
     }
 
@@ -74,7 +74,7 @@ public class MazeThread extends Thread {
         launchChildren();
     }
 
-    // Waiting removed
+
     private void launchChildren() {
         for (int i = 0; i < thisVertex.getVerticesAmount(); i++) {
             if ((thisVertex.getLink(i).getVertex() != parent)
@@ -83,11 +83,11 @@ public class MazeThread extends Thread {
                 MazeThread childThread = new MazeThread(thisVertex, thisVertex.getLink(i).getVertex());
                 children.add(childThread);
                 childThread.start();
-//                try {
-//                    childThread.join(4000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
+                try {
+                    childThread.join(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -130,12 +130,12 @@ public class MazeThread extends Thread {
 
                 // If there is a Thread operating further with old, wrong path, relaunch it!
                 if (thisVertex.getThread() != null) {
-                    thisVertex.getThread().stopFurtherSpreading();
+                    thisVertex.getThread().stopFurtherSpreading(); // If we still can catch it.....
                 }
             }
 
             // TERMINATE
-            return;
+            return; // This also prevents cycling
 
         } else {
             // Such path didn't exist. We are the first

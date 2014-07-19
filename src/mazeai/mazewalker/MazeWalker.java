@@ -13,17 +13,23 @@ public class MazeWalker {
         this.maze = maze;
     }
 
+    // TODO: Make paths in both ways in links. Check existing implementations to support this ideology.
     private Graph convertMazeToGraph(Maze maze) {
         Graph graph = new Graph();
 
         // TODO
         // transformation code here
 
+        /*
+            Find all intersections.
+
+        */
+
         return graph;
     }
 
     public String generatePath() {
-        String path = "";
+        String path;
 
 //        int startX = maze.getStartX();
 //        int startY = maze.getStartY();
@@ -31,25 +37,24 @@ public class MazeWalker {
 //        int finishY = maze.getFinishY();
 
         Graph graph = convertMazeToGraph(maze);
-        /*
-        create new threads for each link from given vertex.
-        for these links calculate new possible path to finish by adding new link's path.
-        Wisely update graph's links based on results.
-         */
 
         // Launching threads for children of Finish( first layer )
         graph.getFinish().setThread(null);
         for (int i = 0; i < graph.getFinish().getVerticesAmount(); i++) {
             MazeThread mainThread = new MazeThread(graph.getFinish(), graph.getFinish().getVertex(i));
+            mainThread.start();
+
+            // We have to wait for all these Threads to finish. Thus we are sure, that all their children have finished.
+            // So all threads have finished, String S-F contains shortest path
+            try {
+                mainThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
+        path = graph.getPathFromStartToFinish();
 
         return path;
     }
-
-    /*
-        terminate when found a link that exists in graph,
-        but suggest a shorter path( if such exists ) before termination.
-
-        join children
-     */
 }
