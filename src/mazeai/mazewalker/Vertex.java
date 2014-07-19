@@ -6,30 +6,30 @@ import java.util.List;
 /**
  * Created by Igor on 19.07.2014.
  */
-public class MazeWalkerVert {
-    private List<MazeWalkerLink> links;
+public class Vertex {
+    private List<Link> links;
 
-    public MazeWalkerVert() {
-        links = new ArrayList<MazeWalkerLink>();
+    public Vertex() {
+        links = new ArrayList<Link>();
     }
 
-    public void addVert(MazeWalkerVert vert, String path) {
-        links.add(new MazeWalkerLink(vert, path));
+    public void addLink(Vertex vertex, String path) {
+        links.add(new Link(vertex, path));
     }
 
-    public int getVertsAmount() {
+    public int getVerticesAmount() {
         return links.size();
     }
 
-    public MazeWalkerVert getVert(int index) {
+    public Vertex getVertex(int index) {
         if ((index >= 0) && (index < links.size())) {
-            return links.get(index).getVert();
+            return links.get(index).getVertex();
         } else {
             return null;
         }
     }
 
-    public String getPathToVert(int index) {
+    public String getPathToVertex(int index) {
         if ((index >= 0) && (index < links.size())) {
             return links.get(index).getPath();
         } else {
