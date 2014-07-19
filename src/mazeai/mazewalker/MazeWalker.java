@@ -36,11 +36,6 @@ public class MazeWalker {
 
         Graph graph = convertMazeToGraph(maze);
 
-        List<Link> layer = new ArrayList<Link>();
-        List<Link> nextLayer = new ArrayList<Link>();
-        for (int i = 0; i < graph.getFinish().getVerticesAmount(); i++) {
-            layer.add(graph.getFinish().getLink(i));
-        }
 
 
         return "";
