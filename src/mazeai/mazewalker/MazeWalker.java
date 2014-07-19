@@ -2,6 +2,9 @@ package mazeai.mazewalker;
 
 import mazeai.Maze;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created:  15.07.2014 20:33.
  */
@@ -31,30 +34,14 @@ public class MazeWalker {
     public String generatePath() {
         String path;
 
-//        int startX = maze.getStartX();
-//        int startY = maze.getStartY();
-//        int finishX = maze.getFinishY();
-//        int finishY = maze.getFinishY();
-
         Graph graph = convertMazeToGraph(maze);
 
-        // Launching threads for children of Finish( first layer )
-        graph.getFinish().setThread(null);
+        List<Link> layer = new ArrayList<Link>();
+        List<Link> nextLayer = new ArrayList<Link>();
         for (int i = 0; i < graph.getFinish().getVerticesAmount(); i++) {
-            MazeThread mainThread = new MazeThread(graph.getFinish(), graph.getFinish().getVertex(i));
-            mainThread.start();
-
-            // We have to wait for all these Threads to finish. Thus we are sure, that all their children have finished.
-            // So all threads have finished, String S-F contains shortest path
-            try {
-                mainThread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            layer.add(graph.getFinish().getLink(i));
         }
 
-        path = graph.getPathFromStartToFinish();
-
-        return path;
+        return "";
     }
 }
