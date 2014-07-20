@@ -14,11 +14,9 @@ public class KeyTable<S, T> {
         keys = new ArrayList<Key<S, T>>();
     }
 
-    private Key<S, T> getKey(S a, S b) {
+    public Key<S, T> getKey(S a, S b) {
         for (Key<S, T> key : keys) {
-            if (((key.getA().equals(a)) && (key.getB().equals(b)))
-                    || ((key.getA().equals(b)) && (key.getB().equals(a)))) {
-
+            if ((key.getA().equals(a)) && (key.getB().equals(b))) {
                 return key;
             }
         }
@@ -29,6 +27,12 @@ public class KeyTable<S, T> {
     public void addKey(S a, S b, T value) {
         if (getKey(a, b) == null) {
             keys.add(new Key(a, b, value));
+        }
+    }
+
+    public void addKey(Key<S, T> newKey) {
+        if (getKey(newKey.getA(), newKey.getB()) == null) {
+            keys.add(newKey);
         }
     }
 
@@ -51,5 +55,21 @@ public class KeyTable<S, T> {
         if (key != null) {
             key.setNewValue(newValue);
         }
+    }
+
+//    public Key<S, T> getKey(S a, S b) {
+//        return getK
+//    }
+
+    public int size() {
+        return keys.size();
+    }
+
+    public Key<S, T> getKey(int index) {
+        if ((index >= 0) && (index < keys.size())) {
+            return keys.get(index);
+        }
+        System.out.println("KEY_TABLE: WRONG INDEX");
+        return null;
     }
 }

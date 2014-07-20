@@ -48,7 +48,88 @@ public class MazeWalker {
         return turns;
     }
 
-    private void prepareForSolving(KeyTable table, Graph graph) {
+    // TODO: check deadlock
+    private Key<Vertex, String> goThereTillNextIntersection
+    (Key<Integer, Vertex> startingPoint, char direction, KeyTable<Integer, Vertex> vertices) {
+        int x = startingPoint.getA();
+        int y = startingPoint.getB();
+//        Key<Integer, Vertex> current = startingPoint;
+
+        switch (direction) {
+            case 'U':
+                y--;
+                break;
+            case 'D':
+                y++;
+                break;
+            case 'R':
+                x++;
+                break;
+            case 'L':
+                x--;
+                break;
+            default:
+                System.out.println("goThereTillNextIntersection: WRONG DIRECTION");
+                return null;
+        }
+
+        String turns = possibleTurns(x, y);
+        String path = "" + direction;
+
+        if ((turns.length() == 1)
+                && (!maze.getTileAt(x, y).equals(Tile.START))
+                && (!maze.getTileAt(x, y).equals(Tile.FINISH))) {
+            // Deadlock
+            return null;
+        }
+
+        while ((turns.length() < 3)
+                && (!maze.getTileAt(x, y).equals(Tile.START))
+                && (!maze.getTileAt(x, y).equals(Tile.FINISH))) {
+
+            // We know that there are 1 or 2 turns possible
+            // We make sure that we don't go back
+            char newDirection = turns.charAt(0);
+            if (newDirection == invert(direction + "").charAt(0)) {
+                newDirection = turns.charAt(1);
+            }
+
+            switch (newDirection) {
+                case 'U':
+                    y--;
+                    break;
+                case 'D':
+                    y++;
+                    break;
+                case 'R':
+                    x++;
+                    break;
+                case 'L':
+                    x--;
+                    break;
+                default:
+                    System.out.println("goThereTillNextIntersection: WRONG DIRECTION");
+                    return null;
+            }
+
+            direction = newDirection;
+
+            if ((turns.length() == 1)
+                    && (!maze.getTileAt(x, y).equals(Tile.START))
+                    && (!maze.getTileAt(x, y).equals(Tile.FINISH))) {
+                // Deadlock
+                return null;
+            }
+
+            turns = possibleTurns(x, y);
+        }
+
+        Vertex finishingPoint = vertices.getKey(x, y).getValue();
+
+        return new Key<Vertex, String>(startingPoint.getValue(), finishingPoint, path);
+    }
+
+    private void prepareForSolving(KeyTable<Vertex, String> table, Graph graph) {
 
         KeyTable<Integer, Vertex> vertices = new KeyTable<>();
 
@@ -69,34 +150,44 @@ public class MazeWalker {
 
         // Now -vertices- contains all future vertices
 
+        for (int i = 0; i < vertices.size(); i++) {
+            Key<Integer, Vertex> currentVertex = vertices.getKey(i);
+            int x = currentVertex.getA();
+            int y = currentVertex.getB();
+            String turns = possibleTurns(x, y);
 
+            for (int t = 0; t < turns.length(); t++) {
+                Key<Vertex, String> ans = goThereTillNextIntersection(currentVertex, turns.charAt(t), vertices);
+                // -newVertex- contains:
+                // a: starting vertex
+                // b: finishing vertex
+                // value: path from starting to finishing vertex
+                if (ans == null) {
+                    // Deadlock
+                    continue;
+                } else {
+                    // Case when such Key already exists is handled in KeyTable class, so I don't bother about it
+                    table.addKey(ans);
+                    table.addKey(ans.getB(), ans.getA(), invert(ans.getValue()));
 
-//        Vertex a = new Vertex();
-//        Vertex b = new Vertex();
-//        Vertex c = new Vertex();
-//        Vertex d = new Vertex();
-//
-//        a.addChild(b);
-//        a.addChild(c);
-//        a.addChild(d);
-//
-//        b.addChild(a);
-//        b.addChild(c);
-//
-//        c.addChild(b);
-//        c.addChild(a);
-//        c.addChild(d);
-//
-//        d.addChild(a);
-//        d.addChild(c);
-//
-//        graph.setStartAndFinishVertex(d, a);
-//
-//        table.addKey(a, b, "D");
-//        table.addKey(b, c, "D");
-//        table.addKey(c, d, "R");
-//        table.addKey(a, c, "LDDR");
-//        table.addKey(a, d, "RRDDL");
+                    Vertex v1 = ans.getA();
+                    Vertex v2 = ans.getB();
+
+                    // Case for existing children is handled in Vertex class
+                    v1.addChild(v2);
+                    v2.addChild(v1);
+                }
+            }
+        }
+
+        int startX = maze.getStartX();
+        int startY = maze.getStartY();
+        int finishX = maze.getFinishX();
+        int finishY = maze.getFinishY();
+        Vertex startVertex = vertices.getKey(startX, startY).getValue();
+        Vertex finishVertex = vertices.getKey(finishX, finishY).getValue();
+
+        graph.setStartAndFinishVertex(startVertex, finishVertex);
     }
 
     private String invert(String path) {
@@ -124,17 +215,14 @@ public class MazeWalker {
     }
 
 
+    // TODO: OPTIMIZATION: For now I added paths into table in both ways. Make it the way so that I add once, but
+    // TODO: OPTIMIZATION: it checks for existing, inverts where necessary
+
     // TODO: no more invert! Implement again!!!
-    // TODO: not working anymore!
     public String generatePath() {
-
-        return "";
-        /*
-
-
-        // Out input for solving
+        // Our input for solving
         Graph graph = new Graph();
-        KeyTable table = new KeyTable();
+        KeyTable<Vertex, String> table = new KeyTable<Vertex, String>();
 
         // Set starting values for input
         prepareForSolving(table, graph);
@@ -170,11 +258,15 @@ public class MazeWalker {
                         if (table.keyExists(thisVertex, finishVertex)) {
                             if (table.getValueForKey(thisVertex, finishVertex).length() > calculatedPath.length()) {
                                 reprocess = true;
+                                // I set in both ways, so that upper existing check is always valid
                                 table.setNewValueForKey(thisVertex, finishVertex, calculatedPath);
+                                table.setNewValueForKey(finishVertex, thisVertex, calculatedPath);
                             }
                             // TERMINATE
                         } else {
+                            // I add in both ways, so that upper existing check is always valid
                             table.addKey(thisVertex, finishVertex, calculatedPath);
+                            table.addKey(finishVertex, thisVertex, calculatedPath);
 
                             // CONTINUE
                             nextLayer.add(thisVertex);
@@ -185,7 +277,5 @@ public class MazeWalker {
         }
 
         return table.getValueForKey(graph.getStart(), graph.getFinish());
-
-        */
     }
 }

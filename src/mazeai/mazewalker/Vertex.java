@@ -14,6 +14,12 @@ public class Vertex {
     }
 
     public void addChild(Vertex vertex) {
+        for (Vertex v : links) {
+            if (v.equals(vertex)) {
+                return;
+            }
+        }
+
         links.add(vertex);
     }
 
