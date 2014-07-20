@@ -39,7 +39,7 @@ public class MazeWalker {
                 turns += 'U';
             }
         }
-        if (y > maze.getHeight() - 1) {
+        if (y < maze.getHeight() - 1) {
             if (!maze.getTileAt(x, y + 1).equals(Tile.WALL)) {
                 turns += 'D';
             }
@@ -90,9 +90,13 @@ public class MazeWalker {
             // We know that there are 1 or 2 turns possible
             // We make sure that we don't go back
             char newDirection = turns.charAt(0);
+//            System.out.println("Length_out: " + turns.length());
             if (newDirection == invert(direction + "").charAt(0)) {
+//                System.out.println("Length_in: " + turns.length());
                 newDirection = turns.charAt(1);
             }
+
+            path += newDirection;
 
             switch (newDirection) {
                 case 'U':
@@ -114,14 +118,14 @@ public class MazeWalker {
 
             direction = newDirection;
 
+            turns = possibleTurns(x, y);
+
             if ((turns.length() == 1)
                     && (!maze.getTileAt(x, y).equals(Tile.START))
                     && (!maze.getTileAt(x, y).equals(Tile.FINISH))) {
                 // Deadlock
                 return null;
             }
-
-            turns = possibleTurns(x, y);
         }
 
         Vertex finishingPoint = vertices.getKey(x, y).getValue();
@@ -155,6 +159,7 @@ public class MazeWalker {
             int x = currentVertex.getA();
             int y = currentVertex.getB();
             String turns = possibleTurns(x, y);
+//            System.out.println("Poss turns:" + turns);
 
             for (int t = 0; t < turns.length(); t++) {
                 Key<Vertex, String> ans = goThereTillNextIntersection(currentVertex, turns.charAt(t), vertices);
@@ -166,6 +171,8 @@ public class MazeWalker {
                     // Deadlock
                     continue;
                 } else {
+//                    System.out.println("Gonna fill table now");
+
                     // Case when such Key already exists is handled in KeyTable class, so I don't bother about it
                     table.addKey(ans);
                     table.addKey(ans.getB(), ans.getA(), invert(ans.getValue()));
@@ -217,8 +224,6 @@ public class MazeWalker {
 
     // TODO: OPTIMIZATION: For now I added paths into table in both ways. Make it the way so that I add once, but
     // TODO: OPTIMIZATION: it checks for existing, inverts where necessary
-
-    // TODO: no more invert! Implement again!!!
     public String generatePath() {
         // Our input for solving
         Graph graph = new Graph();
@@ -226,6 +231,11 @@ public class MazeWalker {
 
         // Set starting values for input
         prepareForSolving(table, graph);
+
+//        System.out.println("TEST: table size:" + table.size());
+//        for (int r = 0; r < table.size(); r++) {
+//            System.out.println("TEST: table: " + table.getValueForKey(table.getKey(r).getA(), table.getKey(r).getB()));
+//        }
 
         // Working space for solving
         List<Vertex> layer;
@@ -276,6 +286,11 @@ public class MazeWalker {
             }
         }
 
-        return table.getValueForKey(graph.getStart(), graph.getFinish());
+        String p = table.getValueForKey(graph.getStart(), graph.getFinish());
+        if (p == null) {
+            System.out.println("I HAVE null");
+        }
+
+        return p;
     }
 }

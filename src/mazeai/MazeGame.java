@@ -55,6 +55,8 @@ public class MazeGame {
         mazeWalker = new MazeWalker(maze);
         String path = mazeWalker.generatePath();
 
+//        return path;
+
         if (isPathValid(path)) {
             return path;
         } else {
@@ -72,7 +74,7 @@ public class MazeGame {
 
         int i = 0;
         while (!((x == maze.getFinishX()) && (y == maze.getFinishY()))) {
-            if ((i) >= path.length()) {
+            if (i >= path.length()) {
                 return false;
             }
 
@@ -122,20 +124,20 @@ public class MazeGame {
         return true;
     }
 
-    private void generateMaze(int defaultMazeWidth, int defaultMazeHeight) {
+    private void generateMaze(int width, int height) {
         if (maze != null) {
-            for (int i = 0; i < defaultMazeWidth; i++) {
+            for (int i = 0; i < width; i++) {
                 maze.setTileAt(i, 0, Tile.WALL);
-                maze.setTileAt(i, defaultMazeHeight - 1, Tile.WALL);
+                maze.setTileAt(i, height - 1, Tile.WALL);
             }
 
-            for (int i = 0; i < defaultMazeHeight; i++) {
+            for (int i = 0; i < height; i++) {
                 maze.setTileAt(0, i, Tile.WALL);
-                maze.setTileAt(defaultMazeWidth - 1, i, Tile.WALL);
+                maze.setTileAt(width - 1, i, Tile.WALL);
             }
 
-            for (int i = 1; i < defaultMazeWidth - 1; i++) {
-                for (int j = 1; j < defaultMazeHeight - 1; j++) {
+            for (int i = 1; i < width - 1; i++) {
+                for (int j = 1; j < height - 1; j++) {
                     maze.setTileAt(i, j, Tile.SPACE);
                 }
             }
@@ -144,8 +146,8 @@ public class MazeGame {
 
             maze.setStart(1, 1);
             maze.setTileAt(1, 1, Tile.START);
-            maze.setFinish(defaultMazeWidth - 2, defaultMazeHeight - 2);
-            maze.setTileAt(defaultMazeWidth - 2, defaultMazeHeight - 2, Tile.FINISH);
+            maze.setFinish(width - 2, height - 2);
+            maze.setTileAt(width - 2, height - 2, Tile.FINISH);
         }
     }
 
@@ -156,8 +158,8 @@ public class MazeGame {
     public static void main(String[] args) {
         MazeGame mazeGame = new MazeGame();
         mazeGame.show();
-//        System.out.println("Solution:");
-//        System.out.println(mazeGame.getSolution());
+        System.out.println("Solution:");
+        System.out.println(mazeGame.getSolution());
 
 //        if (mazeGame.isPathValid("DRRD")) {
 //            System.out.println("YES");
