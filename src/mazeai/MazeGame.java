@@ -35,19 +35,31 @@ public class MazeGame {
     }
 
     private void loadMazeFromFile(String path) {
+        String code;
+        code = "1111111" +
+                "111S111" +
+                "1110111" +
+                "1000001" +
+                "1011101" +
+                "1011101" +
+                "1000001" +
+                "1110111" +
+                "111F111" +
+                "1111111";
+        if (maze != null) {
 
+        }
     }
 
     public String getSolution() {
         mazeWalker = new MazeWalker(maze);
         String path = mazeWalker.generatePath();
 
-        return path;
-//        if (isPathValid(path)) {
-//            return path;
-//        } else {
-//            return "NO SOLUTION WAS FOUND";
-//        }
+        if (isPathValid(path)) {
+            return path;
+        } else {
+            return "NO SOLUTION WAS FOUND";
+        }
     }
 
     public boolean isPathValid(String path) {
@@ -128,6 +140,8 @@ public class MazeGame {
                 }
             }
 
+            maze.setTileAt(2, 2, Tile.WALL);
+
             maze.setStart(1, 1);
             maze.setTileAt(1, 1, Tile.START);
             maze.setFinish(defaultMazeWidth - 2, defaultMazeHeight - 2);
@@ -142,8 +156,8 @@ public class MazeGame {
     public static void main(String[] args) {
         MazeGame mazeGame = new MazeGame();
         mazeGame.show();
-        System.out.println("Solution:");
-        System.out.println(mazeGame.getSolution());
+//        System.out.println("Solution:");
+//        System.out.println(mazeGame.getSolution());
 
 //        if (mazeGame.isPathValid("DRRD")) {
 //            System.out.println("YES");

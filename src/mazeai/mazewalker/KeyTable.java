@@ -38,6 +38,7 @@ public class KeyTable<S, T> {
 
     public T getValueForKey(S a, S b) {
         Key<S, T> key = getKey(a, b);
+
         if (key == null) {
             return null;
         } else {

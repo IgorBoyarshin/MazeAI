@@ -43,15 +43,15 @@ public class Maze {
     }
 
     public void show() {
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                if (maze[i][j].equals(Tile.WALL)) {
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (maze[j][i].equals(Tile.WALL)) {
                     System.out.print("1");
-                } else if (maze[i][j].equals(Tile.SPACE)) {
+                } else if (maze[j][i].equals(Tile.SPACE)) {
                     System.out.print("0");
-                } else if (maze[i][j].equals(Tile.START)) {
+                } else if (maze[j][i].equals(Tile.START)) {
                     System.out.print("S");
-                } else if (maze[i][j].equals(Tile.FINISH)) {
+                } else if (maze[j][i].equals(Tile.FINISH)) {
                     System.out.print("F");
                 } else {
                     System.out.print("-");

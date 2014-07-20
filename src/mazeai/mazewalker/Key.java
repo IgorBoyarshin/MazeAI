@@ -6,7 +6,6 @@ package mazeai.mazewalker;
 public class Key<S, T> {
     private S a;
     private S b;
-
     private T value;
 
     public Key(S a, S b, T value) {

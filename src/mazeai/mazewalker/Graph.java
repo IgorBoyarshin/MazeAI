@@ -9,11 +9,11 @@ public class Graph {
     private Vertex start;
     private Vertex finish;
 
-    private List<Vertex> vertices;
+//    private List<Vertex> vertices;
 
-    public Graph() {
-
-    }
+//    public Graph() {
+//
+//    }
 
 //    public String getPathFromStartToFinish() {
 //        int index = 0;

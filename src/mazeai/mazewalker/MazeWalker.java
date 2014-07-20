@@ -1,6 +1,7 @@
 package mazeai.mazewalker;
 
 import mazeai.Maze;
+import mazeai.Tile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,62 +17,134 @@ public class MazeWalker {
         this.maze = maze;
     }
 
-    // TODO: Make paths in both ways in links. Check existing implementations to support this ideology.
-    private Graph convertMazeToGraph(Maze maze) {
-        Graph graph = new Graph();
+    private String possibleTurns(int x, int y) {
+//        if ((x <= 0) || (x >= maze.getWidth() - 1) || (y <= 0) || (y >= maze.getHeight() - 1)) {
+//            return false;
+//        }
 
-        // TODO
-        // transformation code here
+        String turns = "";
 
-        /*
-            Find all intersections.
+        if (x > 0) {
+            if (!maze.getTileAt(x - 1, y).equals(Tile.WALL)) {
+                turns += 'L';
+            }
+        }
+        if (x < maze.getWidth() - 1) {
+            if (!maze.getTileAt(x + 1, y).equals(Tile.WALL)) {
+                turns += 'R';
+            }
+        }
+        if (y > 0) {
+            if (!maze.getTileAt(x, y - 1).equals(Tile.WALL)) {
+                turns += 'U';
+            }
+        }
+        if (y > maze.getHeight() - 1) {
+            if (!maze.getTileAt(x, y + 1).equals(Tile.WALL)) {
+                turns += 'D';
+            }
+        }
 
-        */
-
-        return graph;
+        return turns;
     }
 
-    private void fillTable(KeyTable table, Graph graph) {
-        Vertex a = new Vertex();
-        Vertex b = new Vertex();
-        Vertex c = new Vertex();
-        Vertex d = new Vertex();
+    private void prepareForSolving(KeyTable table, Graph graph) {
 
-        a.addChild(b);
-        a.addChild(c);
-        a.addChild(d);
+        KeyTable<Integer, Vertex> vertices = new KeyTable<>();
 
-        b.addChild(a);
-        b.addChild(c);
+        for (int x = 0; x < maze.getWidth(); x++) {
+            for (int y = 0; y < maze.getHeight(); y++) {
+                Tile tile = maze.getTileAt(x, y);
 
-        c.addChild(b);
-        c.addChild(a);
-        c.addChild(d);
+                // Checked current column for future vertices
+                if (tile.equals(Tile.START) || tile.equals(Tile.FINISH)) {
+                    vertices.addKey(x, y, new Vertex());
+                } else if (tile.equals(Tile.SPACE)) {
+                    if (possibleTurns(x, y).length() > 2) {
+                        vertices.addKey(x, y, new Vertex());
+                    }
+                }
+            }
+        }
 
-        d.addChild(a);
-        d.addChild(c);
+        // Now -vertices- contains all future vertices
 
-        graph.setStartAndFinishVertex(d, a);
 
-        table.addKey(a, b, "D");
-        table.addKey(b, c, "D");
-        table.addKey(c, d, "R");
-        table.addKey(a, c, "LDDR");
-        table.addKey(a, d, "RRDDL");
+
+//        Vertex a = new Vertex();
+//        Vertex b = new Vertex();
+//        Vertex c = new Vertex();
+//        Vertex d = new Vertex();
+//
+//        a.addChild(b);
+//        a.addChild(c);
+//        a.addChild(d);
+//
+//        b.addChild(a);
+//        b.addChild(c);
+//
+//        c.addChild(b);
+//        c.addChild(a);
+//        c.addChild(d);
+//
+//        d.addChild(a);
+//        d.addChild(c);
+//
+//        graph.setStartAndFinishVertex(d, a);
+//
+//        table.addKey(a, b, "D");
+//        table.addKey(b, c, "D");
+//        table.addKey(c, d, "R");
+//        table.addKey(a, c, "LDDR");
+//        table.addKey(a, d, "RRDDL");
     }
 
+    private String invert(String path) {
+        String invertedPath = "";
+
+        for (int i = 0; i < path.length(); i++) {
+            switch (path.charAt(i)) {
+                case 'U':
+                    invertedPath += "D";
+                    break;
+                case 'D':
+                    invertedPath += "U";
+                    break;
+                case 'L':
+                    invertedPath += "R";
+                    break;
+                case 'R':
+                    invertedPath += "L";
+                    break;
+                default:
+                    return null;
+            }
+        }
+        return invertedPath;
+    }
+
+
+    // TODO: no more invert! Implement again!!!
+    // TODO: not working anymore!
     public String generatePath() {
 
-        Graph graph = convertMazeToGraph(maze);
+        return "";
+        /*
 
+
+        // Out input for solving
+        Graph graph = new Graph();
+        KeyTable table = new KeyTable();
+
+        // Set starting values for input
+        prepareForSolving(table, graph);
+
+        // Working space for solving
         List<Vertex> layer;
         List<Vertex> nextLayer = new ArrayList<Vertex>();
 
-        // TODO: Fill table with starting values!!!
-        KeyTable table = new KeyTable();
-        fillTable(table, graph);
+        // Starting preparations
         table.addKey(graph.getFinish(), graph.getFinish(), "");
-
         nextLayer.add(graph.getFinish());
 
         while (nextLayer.size() > 0) {
@@ -82,7 +155,6 @@ public class MazeWalker {
 
                 boolean reprocess = true;
                 // TODO: think of a better way!
-                // TODO: Not sure, just trying...
                 while (reprocess) {
                     reprocess = false;
                     // take its children, process them
@@ -113,5 +185,7 @@ public class MazeWalker {
         }
 
         return table.getValueForKey(graph.getStart(), graph.getFinish());
+
+        */
     }
 }
