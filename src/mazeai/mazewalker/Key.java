@@ -3,31 +3,31 @@ package mazeai.mazewalker;
 /**
  * Created by Igor on 19.07.2014 at 17:53.
  */
-public class Key {
-    private Vertex a;
-    private Vertex b;
+public class Key<S, T> {
+    private S a;
+    private S b;
 
-    private String value;
+    private T value;
 
-    public Key(Vertex a, Vertex b, String value) {
+    public Key(S a, S b, T value) {
         this.a = a;
         this.b = b;
         this.value = value;
     }
 
-    public Vertex getA() {
+    public S getA() {
         return a;
     }
 
-    public Vertex getB() {
+    public S getB() {
         return b;
     }
 
-    public String getValue() {
+    public T getValue() {
         return value;
     }
 
-    public void setNewValue(String newValue) {
+    public void setNewValue(T newValue) {
         this.value = newValue;
     }
 }
