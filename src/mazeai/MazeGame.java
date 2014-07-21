@@ -20,13 +20,15 @@ public class MazeGame {
     private MazeWalker mazeWalker;
 
     public MazeGame() {
-        maze = new Maze(defaultMazeWidth, defaultMazeHeight);
-        generateMaze(defaultMazeWidth, defaultMazeHeight);
+
+//        generateMaze(defaultMazeWidth, defaultMazeHeight);
+        loadMazeFromString();
     }
 
     public MazeGame(final int width, final int height) {
         maze = new Maze(width, height);
         generateMaze(width, height);
+
     }
 
     public MazeGame(final int width, final int height, String pathToFile) {
@@ -34,7 +36,8 @@ public class MazeGame {
         loadMazeFromFile(pathToFile);
     }
 
-    private void loadMazeFromFile(String path) {
+    private void loadMazeFromString() {
+        maze = new Maze(7, 10);
         String code;
         code = "1111111" +
                 "111S111" +
@@ -46,9 +49,36 @@ public class MazeGame {
                 "1110111" +
                 "111F111" +
                 "1111111";
-        if (maze != null) {
+        for (int y = 0; y < maze.getHeight(); y++) {
+            for (int x = 0; x < maze.getWidth(); x++) {
+                int index = y*maze.getWidth() + x;
+                Tile tile;
+                switch (code.charAt(index)) {
+                    case '1':
+                        tile = Tile.WALL;
+                        break;
+                    case '0':
+                        tile = Tile.SPACE;
+                        break;
+                    case 'S':
+                        tile = Tile.START;
+                        maze.setStart(x,y);
+                        break;
+                    case 'F':
+                        tile = Tile.FINISH;
+                        maze.setFinish(x,y);
+                        break;
+                    default:
+                        tile = Tile.SPACE;
+                }
 
+                maze.setTileAt(x,y,tile);
+            }
         }
+    }
+
+    private void loadMazeFromFile(String path) {
+
     }
 
     public String getSolution() {
@@ -143,6 +173,9 @@ public class MazeGame {
             }
 
             maze.setTileAt(2, 2, Tile.WALL);
+            maze.setTileAt(2, 3, Tile.WALL);
+            maze.setTileAt(3, 2, Tile.WALL);
+            maze.setTileAt(3, 3, Tile.WALL);
 
             maze.setStart(1, 1);
             maze.setTileAt(1, 1, Tile.START);

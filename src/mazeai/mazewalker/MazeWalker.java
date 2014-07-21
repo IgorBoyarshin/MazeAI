@@ -80,6 +80,7 @@ public class MazeWalker {
                 && (!maze.getTileAt(x, y).equals(Tile.START))
                 && (!maze.getTileAt(x, y).equals(Tile.FINISH))) {
             // Deadlock
+            System.out.println("DEADLOCK");
             return null;
         }
 
@@ -124,9 +125,16 @@ public class MazeWalker {
                     && (!maze.getTileAt(x, y).equals(Tile.START))
                     && (!maze.getTileAt(x, y).equals(Tile.FINISH))) {
                 // Deadlock
+                System.out.println("DEADLOCK");
                 return null;
             }
         }
+
+//        System.out.println("PATH: " + path);
+//        if ((maze.getTileAt(x, y).equals(Tile.START))
+//                || (maze.getTileAt(x, y).equals(Tile.FINISH))) {
+//            System.out.println("S or F");
+//        }
 
         Vertex finishingPoint = vertices.getKey(x, y).getValue();
 
@@ -153,13 +161,15 @@ public class MazeWalker {
         }
 
         // Now -vertices- contains all future vertices
+//        System.out.println("TEST: vertices amount:" + vertices.size());
 
         for (int i = 0; i < vertices.size(); i++) {
             Key<Integer, Vertex> currentVertex = vertices.getKey(i);
             int x = currentVertex.getA();
             int y = currentVertex.getB();
             String turns = possibleTurns(x, y);
-//            System.out.println("Poss turns:" + turns);
+//            System.out.println("Poss turns amount for x,y: " + x + ":" + y + "=" + turns.length());
+//            System.out.println("Poss turns: " + turns);
 
             for (int t = 0; t < turns.length(); t++) {
                 Key<Vertex, String> ans = goThereTillNextIntersection(currentVertex, turns.charAt(t), vertices);
@@ -169,13 +179,25 @@ public class MazeWalker {
                 // value: path from starting to finishing vertex
                 if (ans == null) {
                     // Deadlock
+                    System.out.println("Found deadlock");
                     continue;
                 } else {
 //                    System.out.println("Gonna fill table now");
 
+                    // Such way I properly handle when there are two or more paths to the same vertex from given
+                    if (table.keyExists(ans.getA(), ans.getB())) {
+                        if (ans.getValue().length() < table.getValueForKey(ans.getA(), ans.getB()).length()) {
+                            table.setNewValueForKey(ans.getA(), ans.getB(), ans.getValue());
+                            table.setNewValueForKey(ans.getB(), ans.getA(), invert(ans.getValue()));
+                        }
+                    } else {
+                        table.addKey(ans);
+                        table.addKey(ans.getB(), ans.getA(), invert(ans.getValue()));
+                    }
+
                     // Case when such Key already exists is handled in KeyTable class, so I don't bother about it
-                    table.addKey(ans);
-                    table.addKey(ans.getB(), ans.getA(), invert(ans.getValue()));
+//                    table.addKey(ans);
+//                    table.addKey(ans.getB(), ans.getA(), invert(ans.getValue()));
 
                     Vertex v1 = ans.getA();
                     Vertex v2 = ans.getB();
@@ -218,6 +240,7 @@ public class MazeWalker {
                     return null;
             }
         }
+
         return invertedPath;
     }
 
@@ -232,7 +255,6 @@ public class MazeWalker {
         // Set starting values for input
         prepareForSolving(table, graph);
 
-//        System.out.println("TEST: table size:" + table.size());
 //        for (int r = 0; r < table.size(); r++) {
 //            System.out.println("TEST: table: " + table.getValueForKey(table.getKey(r).getA(), table.getKey(r).getB()));
 //        }
@@ -265,7 +287,9 @@ public class MazeWalker {
                         String calculatedPath = table.getValueForKey(thisVertex, parentVertex)
                                 + table.getValueForKey(parentVertex, finishVertex);
 
-                        if (table.keyExists(thisVertex, finishVertex)) {
+                        // I check also for parent==finish because otherwise everything(given only one child for
+                        // finish) would terminate
+                        if ((table.keyExists(thisVertex, finishVertex)) && (!parentVertex.equals(finishVertex))) {
                             if (table.getValueForKey(thisVertex, finishVertex).length() > calculatedPath.length()) {
                                 reprocess = true;
                                 // I set in both ways, so that upper existing check is always valid
