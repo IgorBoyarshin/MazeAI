@@ -40,14 +40,14 @@ public class MazeGame {
         maze = new Maze(7, 10);
         String code;
         code = "1111111" +
-                "111S111" +
-                "1110111" +
+                "111S101" +
+                "1110101" +
                 "1000001" +
                 "1011101" +
                 "1011101" +
                 "1000001" +
-                "1110111" +
-                "111F111" +
+                "1010111" +
+                "101F111" +
                 "1111111";
         for (int y = 0; y < maze.getHeight(); y++) {
             for (int x = 0; x < maze.getWidth(); x++) {
@@ -90,7 +90,7 @@ public class MazeGame {
         if (isPathValid(path)) {
             return path;
         } else {
-            return "NO SOLUTION WAS FOUND";
+            return path + "_NO SOLUTION WAS FOUND";
         }
     }
 
