@@ -249,7 +249,7 @@ public class MazeGame {
     }
 
     public static void main(String[] args) {
-        MazeGame mazeGame = new MazeGame("C:/Root/lab.lab");
+        MazeGame mazeGame = new MazeGame("C:/Root/maze.maz");
         mazeGame.show();
         Measure measure = new Measure();
 

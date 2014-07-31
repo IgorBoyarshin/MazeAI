@@ -39,6 +39,7 @@ public class MazeWalker {
 
         // Starting preparations
         table.addKey(finish, finish, "");
+        table.addKey(start, start, "");
         nextLayer.add(finish);
 
         while (nextLayer.size() > 0) {
@@ -46,10 +47,11 @@ public class MazeWalker {
             nextLayer = new ArrayList<Vertex>();
 
             for (int i = 0; i < layer.size(); i++) {
-                boolean reprocess = true;
+//                boolean reprocess = true;
                 // TODO: think of a better way!
-                while (reprocess) {
-                    reprocess = false;
+//                while (reprocess) {
+//                    reprocess = false;
+
                     // take its children, process them
                     for (int j = 0; j < layer.get(i).getChildrenAmount(); j++) {
                         Vertex thisVertex = layer.get(i).getChild(j);
@@ -63,10 +65,11 @@ public class MazeWalker {
                         // finish) would terminate
                         if (table.keyExists(thisVertex, finish)) {
                             if (table.getValueForKey(thisVertex, finish).length() > calculatedPath.length()) {
-                                reprocess = true;
+//                                reprocess = true;
+
                                 // I set in both ways, so that upper existing check is always valid
                                 table.setNewValueForKey(thisVertex, finish, calculatedPath);
-                                table.setNewValueForKey(finish, thisVertex, calculatedPath);
+                                table.setNewValueForKey(finish, thisVertex, invert(calculatedPath));
                             }
 
                             if (parentVertex.equals(finish)) {
@@ -79,7 +82,7 @@ public class MazeWalker {
                         } else {
                             // I add in both ways, so that upper existing check is always valid
                             table.addKey(thisVertex, finish, calculatedPath);
-                            table.addKey(finish, thisVertex, calculatedPath);
+                            table.addKey(finish, thisVertex, invert(calculatedPath));
 
                             if (!thisVertex.equals(start)) {
                                 // CONTINUE
@@ -90,12 +93,14 @@ public class MazeWalker {
                         }
                     }
 
-                    if (reprocess) {
-                        nextLayer = new ArrayList<Vertex>();
-                    }
-                }
+//                    if (reprocess) {
+//                        nextLayer = new ArrayList<Vertex>();
+//                    }
+//                }
             }
         }
+
+        System.out.println("Table size:" + table.size());
 
         String p = table.getValueForKey(start, finish);
         if (p == null) {
