@@ -1,6 +1,7 @@
 package mazeai;
 
 import libs.Measure;
+import mazeai.mazewalker.EDirection;
 import mazeai.mazewalker.MazeWalker;
 
 import java.io.BufferedReader;
@@ -12,140 +13,85 @@ import java.io.IOException;
  * Created:  15.07.2014 20:37.
  */
 public class MazeGame {
-
-    // TODO:
-    /*
-        Make PixelMap able to load in and display mazes with paths.
-        Include support for PixelMap files for mazes.
-     */
-
     private final int defaultMazeWidth = 5;
     private final int defaultMazeHeight = 5;
+    private final String defaultPathToMaze = "C:/Root/maze.maz";
 
     private Maze maze;
-    private MazeWalker mazeWalker;
 
     public MazeGame() {
-        maze = new Maze(defaultMazeWidth, defaultMazeHeight);
-        generateMaze(defaultMazeWidth, defaultMazeHeight);
-//        loadMazeFromString();
-    }
-
-    public MazeGame(final int width, final int height) {
-        maze = new Maze(width, height);
-//        generateMaze(width, height);
-        loadMazeFromFile("lab.lab");
-    }
-
-    public MazeGame(String path) {
-        loadMazeFromFile(path);
-
-        if (maze == null) {
-            System.out.println("INVALID INPUT FILE");
+        if (!loadMazeFromFile(defaultPathToMaze)) {
+            System.out.println("MAZE_GAME: INVALID PATH TO DEFAULT MAZE. GENERATING RANDOM MAZE");
+            generateMaze(defaultMazeWidth, defaultMazeHeight);
         }
     }
 
-    public MazeGame(final int width, final int height, String pathToFile) {
-        maze = new Maze(width, height);
-        loadMazeFromFile(pathToFile);
+    public MazeGame(int width, int height, String code) {
+        maze = new Maze(width, height, code);
     }
 
-    private void loadMazeFromString(String source, int width, int height) {
-        if (source.length() != width * height) {
-            return;
-        }
+    public MazeGame(int width, int height) {
+        generateMaze(width, height);
+    }
 
-        maze = new Maze(width, height);
-
-        for (int y = 0; y < maze.getHeight(); y++) {
-            for (int x = 0; x < maze.getWidth(); x++) {
-                int index = y * maze.getWidth() + x;
-                Tile tile;
-                switch (source.charAt(index)) {
-                    case '1':
-                        tile = Tile.WALL;
-                        break;
-                    case '0':
-                        tile = Tile.SPACE;
-                        break;
-                    case 'S':
-                        tile = Tile.START;
-                        maze.setStart(x, y);
-                        break;
-                    case 'F':
-                        tile = Tile.FINISH;
-                        maze.setFinish(x, y);
-                        break;
-                    default:
-                        tile = Tile.SPACE;
-                }
-
-                maze.setTileAt(x, y, tile);
-            }
+    public MazeGame(String pathToMaze) {
+        if (!loadMazeFromFile(pathToMaze)) {
+            System.out.println("MAZE_GAME: INVALID PATH TO MAZE.");
         }
     }
 
-    private void loadMazeFromFile(String path) {
+    private boolean loadMazeFromFile(String path) {
         try {
             BufferedReader in = new BufferedReader(new FileReader(path));
 
             int width = Integer.parseInt(in.readLine());
             int height = Integer.parseInt(in.readLine());
 
-            if (width < 2 || height < 2) {
+            if (width < Maze.getMinWidth() || height < Maze.getMinHeight() || width > Maze.getMaxWidth() || height > Maze.getMaxHeight()) {
                 in.close();
-                return;
+                return false;
             }
 
-            maze = new Maze(width, height);
+            String code = "";
 
-            for (int i = 0; i < height; i++) {
+            for (int y = 0; y < height; y++) {
                 String line = in.readLine();
-                for (int j = 0; j < width; j++) {
-                    char c = line.charAt(j);
-                    Tile tile;
+                for (int x = 0; x < width; x++) {
+                    char symbol = line.charAt(x);
 
-                    switch (c) {
-                        case '1':
-                            tile = Tile.WALL;
-                            break;
-                        case '0':
-                            tile = Tile.SPACE;
-                            break;
-                        case 'S':
-                            tile = Tile.START;
-                            maze.setStart(j, i);
-                            break;
-                        case 'F':
-                            tile = Tile.FINISH;
-                            maze.setFinish(j, i);
-                            break;
-                        default:
-                            tile = Tile.SPACE;
+                    code += symbol;
+                    if (!(symbol == ETile.FINISH.getSymbol() || symbol == ETile.SPACE.getSymbol()
+                            || symbol == ETile.START.getSymbol() || symbol == ETile.WALL.getSymbol())) {
+                        return false;
                     }
-
-                    maze.setTileAt(j, i, tile);
                 }
             }
+
+            maze = new Maze(width, height, code);
 
             in.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            return false;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
+
+        return true;
     }
 
     public String getSolution() {
         if (maze != null) {
-            mazeWalker = new MazeWalker(maze);
+            MazeWalker mazeWalker = new MazeWalker(maze);
 
             String path = mazeWalker.generatePath();
 
             if (isPathValid(path)) {
                 return path;
             } else {
-                return path + "_NO SOLUTION WAS FOUND";
+//                return path + "_NO SOLUTION WAS FOUND";
+                return "NO SOLUTION WAS FOUND";
             }
         } else {
             return null;
@@ -166,37 +112,33 @@ public class MazeGame {
                 return false;
             }
 
-            switch (path.charAt(i)) {
-                case 'U':
-                    if (maze.getTileAt(x, y - 1).equals(Tile.WALL)) {
-                        return false;
-                    } else {
-                        y--;
-                    }
-                    break;
-                case 'D':
-                    if (maze.getTileAt(x, y + 1).equals(Tile.WALL)) {
-                        return false;
-                    } else {
-                        y++;
-                    }
-                    break;
-                case 'R':
-                    if (maze.getTileAt(x + 1, y).equals(Tile.WALL)) {
-                        return false;
-                    } else {
-                        x++;
-                    }
-                    break;
-                case 'L':
-                    if (maze.getTileAt(x - 1, y).equals(Tile.WALL)) {
-                        return false;
-                    } else {
-                        x--;
-                    }
-                    break;
-                default:
+            char c = path.charAt(i);
+            if (c == EDirection.UP.getSymbol()) {
+                if (maze.getTileAt(x, y - 1).equals(ETile.WALL)) {
                     return false;
+                } else {
+                    y--;
+                }
+            } else if (c == EDirection.DOWN.getSymbol()) {
+                if (maze.getTileAt(x, y + 1).equals(ETile.WALL)) {
+                    return false;
+                } else {
+                    y++;
+                }
+            } else if (c == EDirection.RIGHT.getSymbol()) {
+                if (maze.getTileAt(x + 1, y).equals(ETile.WALL)) {
+                    return false;
+                } else {
+                    x++;
+                }
+            } else if (c == EDirection.LEFT.getSymbol()) {
+                if (maze.getTileAt(x - 1, y).equals(ETile.WALL)) {
+                    return false;
+                } else {
+                    x--;
+                }
+            } else {
+                return false;
             }
 
             i++;
@@ -206,44 +148,32 @@ public class MazeGame {
             return false;
         }
 
-        // I believe we have successfully exited from the loop, which
-        // means that the path is valid... I guess
-
         return true;
     }
 
     private void generateMaze(int width, int height) {
-        if (maze != null) {
-            for (int i = 0; i < width; i++) {
-                maze.setTileAt(i, 0, Tile.WALL);
-                maze.setTileAt(i, height - 1, Tile.WALL);
-            }
+        String code = "";
 
-            for (int i = 0; i < height; i++) {
-                maze.setTileAt(0, i, Tile.WALL);
-                maze.setTileAt(width - 1, i, Tile.WALL);
-            }
-
-            for (int i = 1; i < width - 1; i++) {
-                for (int j = 1; j < height - 1; j++) {
-                    maze.setTileAt(i, j, Tile.SPACE);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (y == 0 || y == height - 1 || x == 0 || x == width - 1) {
+                    code += ETile.WALL.getSymbol();
+                } else if (y == 1 && x == 1) {
+                    code += ETile.START.getSymbol();
+                } else if (y == height - 2 && (x == width - 2)) {
+                    code += ETile.FINISH.getSymbol();
+                } else {
+                    code += ETile.SPACE.getSymbol();
                 }
             }
-
-            maze.setTileAt(2, 2, Tile.WALL);
-//            maze.setTileAt(2, 3, Tile.WALL);
-//            maze.setTileAt(3, 2, Tile.WALL);
-//            maze.setTileAt(3, 3, Tile.WALL);
-
-            maze.setStart(1, 1);
-            maze.setTileAt(1, 1, Tile.START);
-            maze.setFinish(width - 2, height - 2);
-            maze.setTileAt(width - 2, height - 2, Tile.FINISH);
         }
+
+        maze = new Maze(width, height, code);
     }
 
     public void show() {
         if (maze != null) {
+            System.out.println("Width:" + maze.getWidth() + "; Height:" + maze.getHeight());
             maze.show();
         }
     }

@@ -57,10 +57,6 @@ public class KeyTable<S, T> {
         }
     }
 
-//    public Key<S, T> getKey(S a, S b) {
-//        return getK
-//    }
-
     public int size() {
         return keys.size();
     }

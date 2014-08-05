@@ -1,7 +1,7 @@
 package mazeai.mazewalker;
 
+import mazeai.ETile;
 import mazeai.Maze;
-import mazeai.Tile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,6 @@ import java.util.List;
 public class MazeWalker {
     private Maze maze;
 
-    // TODO: Remove setters for MazeWalker in Maze
     public MazeWalker(Maze maze) {
         this.maze = maze;
     }
@@ -47,67 +46,73 @@ public class MazeWalker {
             nextLayer = new ArrayList<Vertex>();
 
             for (int i = 0; i < layer.size(); i++) {
-//                boolean reprocess = true;
-                // TODO: think of a better way!
-//                while (reprocess) {
-//                    reprocess = false;
+                // take its children, process them
+                for (int j = 0; j < layer.get(i).getChildrenAmount(); j++) {
+                    Vertex thisVertex = layer.get(i).getChild(j);
+                    Vertex parentVertex = layer.get(i);
 
-                    // take its children, process them
-                    for (int j = 0; j < layer.get(i).getChildrenAmount(); j++) {
-                        Vertex thisVertex = layer.get(i).getChild(j);
-                        Vertex parentVertex = layer.get(i);
+                    // check table for that key
+//                    String calculatedPath = table.getValueForKey(thisVertex, parentVertex)
+//                            + table.getValueForKey(parentVertex, finish);
+                    String calculatedPath = getValueForThisOrOppositeKey(table, thisVertex, parentVertex) +
+                            getValueForThisOrOppositeKey(table, parentVertex, finish);
 
-                        // check table for that key
-                        String calculatedPath = table.getValueForKey(thisVertex, parentVertex)
-                                + table.getValueForKey(parentVertex, finish);
-
-                        // I check also for parent==finish because otherwise everything(given only one child for
-                        // finish) would terminate
-                        if (table.keyExists(thisVertex, finish)) {
-                            if (table.getValueForKey(thisVertex, finish).length() > calculatedPath.length()) {
-//                                reprocess = true;
-
-                                // I set in both ways, so that upper existing check is always valid
-                                table.setNewValueForKey(thisVertex, finish, calculatedPath);
-                                table.setNewValueForKey(finish, thisVertex, invert(calculatedPath));
-                            }
-
-                            if (parentVertex.equals(finish)) {
-                                // CONTINUE
-                                nextLayer.add(thisVertex);
-                            }
-
-                            // TERMINATE
-
-                        } else {
-                            // I add in both ways, so that upper existing check is always valid
-                            table.addKey(thisVertex, finish, calculatedPath);
-                            table.addKey(finish, thisVertex, invert(calculatedPath));
-
-                            if (!thisVertex.equals(start)) {
-                                // CONTINUE
-                                nextLayer.add(thisVertex);
-                            }
-
-                            // If this is Start then TERMINATE
+                    // I check also for parent==finish because otherwise everything(given only one child for
+                    // finish) would terminate
+                    if (table.keyExists(thisVertex, finish) || table.keyExists(finish, thisVertex)) {
+                        if (getValueForThisOrOppositeKey(table, thisVertex, finish).length() > calculatedPath.length()) {
+                            setNewValueForKeyOrOpposite(table, thisVertex, finish, calculatedPath);
                         }
-                    }
 
-//                    if (reprocess) {
-//                        nextLayer = new ArrayList<Vertex>();
-//                    }
-//                }
+                        if (parentVertex.equals(finish)) {
+                            // CONTINUE
+                            nextLayer.add(thisVertex);
+                        }
+
+                        // TERMINATE
+
+                    } else {
+                        table.addKey(thisVertex, finish, calculatedPath);
+//                        table.addKey(finish, thisVertex, invert(calculatedPath));
+
+                        if (!thisVertex.equals(start)) {
+                            // CONTINUE
+                            nextLayer.add(thisVertex);
+                        }
+
+                        // If this is Start then TERMINATE
+                    }
+                }
             }
         }
 
-        System.out.println("Table size:" + table.size());
+//        System.out.println("Table size:" + table.size());
 
-        String p = table.getValueForKey(start, finish);
+//        String p = table.getValueForKey(start, finish);
+        String p = getValueForThisOrOppositeKey(table, start, finish);
         if (p == null) {
             System.out.println("Start -> Finish == null");
         }
 
         return p;
+    }
+
+    private String getValueForThisOrOppositeKey(KeyTable<Vertex, String> table, Vertex a, Vertex b) {
+        if (table.keyExists(a,b)) {
+            return table.getValueForKey(a,b);
+        } else if (table.keyExists(b,a)) {
+            return invert(table.getValueForKey(b,a));
+        } else {
+            return null;
+        }
+    }
+
+    private void setNewValueForKeyOrOpposite(KeyTable<Vertex, String> table, Vertex a, Vertex b, String value) {
+        if (table.keyExists(a,b)) {
+            table.setNewValueForKey(a,b,value);
+        } else if (table.keyExists(b,a)) {
+            table.setNewValueForKey(b,a, invert(value));
+        }
     }
 
     private void prepareForSolving(KeyTable<Vertex, String> table, StartFinish startFinish) {
@@ -116,11 +121,11 @@ public class MazeWalker {
 
         for (int x = 0; x < maze.getWidth(); x++) {
             for (int y = 0; y < maze.getHeight(); y++) {
-                Tile tile = maze.getTileAt(x, y);
+                ETile ETile = maze.getTileAt(x, y);
 
-                if (tile.equals(Tile.START) || tile.equals(Tile.FINISH)) {
+                if (ETile.equals(ETile.START) || ETile.equals(ETile.FINISH)) {
                     vertices.addKey(x, y, new Vertex());
-                } else if (tile.equals(Tile.SPACE)) {
+                } else if (ETile.equals(ETile.SPACE)) {
                     if (possibleTurns(x, y).length() > 2) {
                         vertices.addKey(x, y, new Vertex());
                     }
@@ -158,6 +163,7 @@ public class MazeWalker {
                 // a: starting vertex
                 // b: finishing vertex
                 // value: path from starting to finishing vertex
+                // -ans- == null if deadlock
 
                 /*
                 // TEST
@@ -196,6 +202,10 @@ public class MazeWalker {
                             */
 
                             table.setNewValueForKey(ans.getA(), ans.getB(), ans.getValue());
+//                            table.setNewValueForKey(ans.getB(), ans.getA(), invert(ans.getValue()));
+                        }
+                    } else if (table.keyExists(ans.getB(), ans.getA())) {
+                        if (ans.getValue().length() < table.getValueForKey(ans.getB(), ans.getA()).length()) {
                             table.setNewValueForKey(ans.getB(), ans.getA(), invert(ans.getValue()));
                         }
                     } else {
@@ -206,7 +216,7 @@ public class MazeWalker {
                         */
 
                         table.addKey(ans);
-                        table.addKey(ans.getB(), ans.getA(), invert(ans.getValue()));
+//                        table.addKey(ans.getB(), ans.getA(), invert(ans.getValue()));
                     }
 
                     Vertex v1 = ans.getA();
@@ -227,71 +237,38 @@ public class MazeWalker {
         startFinish.setFinish(vertices.getKey(finishX, finishY).getValue());
     }
 
-    private String possibleTurns(int x, int y) {
-        String turns = "";
-
-        if (x > 0) {
-            if (!maze.getTileAt(x - 1, y).equals(Tile.WALL)) {
-                turns += 'L';
-            }
-        }
-        if (x < maze.getWidth() - 1) {
-            if (!maze.getTileAt(x + 1, y).equals(Tile.WALL)) {
-                turns += 'R';
-            }
-        }
-        if (y > 0) {
-            if (!maze.getTileAt(x, y - 1).equals(Tile.WALL)) {
-                turns += 'U';
-            }
-        }
-        if (y < maze.getHeight() - 1) {
-            if (!maze.getTileAt(x, y + 1).equals(Tile.WALL)) {
-                turns += 'D';
-            }
-        }
-
-        return turns;
-    }
-
     private Key<Vertex, String> goUntilVertexOrDeadlock
             (Key<Integer, Vertex> startingPoint, char direction, KeyTable<Integer, Vertex> vertices) {
         int x = startingPoint.getA();
         int y = startingPoint.getB();
-//        Key<Integer, Vertex> current = startingPoint;
 
-        switch (direction) {
-            case 'U':
-                y--;
-                break;
-            case 'D':
-                y++;
-                break;
-            case 'R':
-                x++;
-                break;
-            case 'L':
-                x--;
-                break;
-            default:
-                System.out.println("goUntilVertexOrDeadlock: WRONG DIRECTION");
-                return null;
+        if (direction == EDirection.UP.getSymbol()) {
+            y--;
+        } else if (direction == EDirection.DOWN.getSymbol()) {
+            y++;
+        } else if (direction == EDirection.RIGHT.getSymbol()) {
+            x++;
+        } else if (direction == EDirection.LEFT.getSymbol()) {
+            x--;
+        } else {
+            System.out.println("goUntilVertexOrDeadlock: WRONG DIRECTION");
+            return null;
         }
 
         String turns = possibleTurns(x, y);
         String path = "" + direction;
 
         if ((turns.length() == 1)
-                && (!maze.getTileAt(x, y).equals(Tile.START))
-                && (!maze.getTileAt(x, y).equals(Tile.FINISH))) {
+                && (!maze.getTileAt(x, y).equals(ETile.START))
+                && (!maze.getTileAt(x, y).equals(ETile.FINISH))) {
             // Deadlock
 //            System.out.println("DEADLOCK_OUT");
             return null;
         }
 
         while ((turns.length() < 3)
-                && (!maze.getTileAt(x, y).equals(Tile.START))
-                && (!maze.getTileAt(x, y).equals(Tile.FINISH))) {
+                && (!maze.getTileAt(x, y).equals(ETile.START))
+                && (!maze.getTileAt(x, y).equals(ETile.FINISH))) {
 
             // We know that there are 1 or 2 turns possible
             // We make sure that we don't go back
@@ -304,22 +281,17 @@ public class MazeWalker {
 
             path += newDirection;
 
-            switch (newDirection) {
-                case 'U':
-                    y--;
-                    break;
-                case 'D':
-                    y++;
-                    break;
-                case 'R':
-                    x++;
-                    break;
-                case 'L':
-                    x--;
-                    break;
-                default:
-                    System.out.println("goUntilVertexOrDeadlock: WRONG DIRECTION");
-                    return null;
+            if (newDirection == EDirection.UP.getSymbol()) {
+                y--;
+            } else if (newDirection == EDirection.DOWN.getSymbol()) {
+                y++;
+            } else if (newDirection == EDirection.RIGHT.getSymbol()) {
+                x++;
+            } else if (newDirection == EDirection.LEFT.getSymbol()) {
+                x--;
+            } else {
+                System.out.println("goUntilVertexOrDeadlock: WRONG DIRECTION");
+                return null;
             }
 
             direction = newDirection;
@@ -327,8 +299,8 @@ public class MazeWalker {
             turns = possibleTurns(x, y);
 
             if ((turns.length() == 1)
-                    && (!maze.getTileAt(x, y).equals(Tile.START))
-                    && (!maze.getTileAt(x, y).equals(Tile.FINISH))) {
+                    && (!maze.getTileAt(x, y).equals(ETile.START))
+                    && (!maze.getTileAt(x, y).equals(ETile.FINISH))) {
                 // Deadlock
 //                System.out.println("DEADLOCK_IN");
                 return null;
@@ -346,25 +318,49 @@ public class MazeWalker {
         return new Key<Vertex, String>(startingPoint.getValue(), finishingPoint, path);
     }
 
+    private String possibleTurns(int x, int y) {
+        String turns = "";
+
+        if (x > 0) {
+            if (!maze.getTileAt(x - 1, y).equals(ETile.WALL)) {
+                turns += EDirection.LEFT.getSymbol();
+            }
+        }
+        if (x < maze.getWidth() - 1) {
+            if (!maze.getTileAt(x + 1, y).equals(ETile.WALL)) {
+                turns += EDirection.RIGHT.getSymbol();
+            }
+        }
+        if (y > 0) {
+            if (!maze.getTileAt(x, y - 1).equals(ETile.WALL)) {
+                turns += EDirection.UP.getSymbol();
+            }
+        }
+        if (y < maze.getHeight() - 1) {
+            if (!maze.getTileAt(x, y + 1).equals(ETile.WALL)) {
+                turns += EDirection.DOWN.getSymbol();
+            }
+        }
+
+        return turns;
+    }
+
     private String invert(String path) {
         String invertedPath = "";
 
         for (int i = path.length() - 1; i >= 0; i--) {
-            switch (path.charAt(i)) {
-                case 'U':
-                    invertedPath += "D";
-                    break;
-                case 'D':
-                    invertedPath += "U";
-                    break;
-                case 'L':
-                    invertedPath += "R";
-                    break;
-                case 'R':
-                    invertedPath += "L";
-                    break;
-                default:
-                    return null;
+            char symbol = path.charAt(i);
+
+            if (symbol == EDirection.UP.getSymbol()) {
+                invertedPath += EDirection.DOWN.getSymbol();
+            } else if (symbol == EDirection.DOWN.getSymbol()) {
+                invertedPath += EDirection.UP.getSymbol();
+            } else if (symbol == EDirection.RIGHT.getSymbol()) {
+                invertedPath += EDirection.LEFT.getSymbol();
+            } else if (symbol == EDirection.LEFT.getSymbol()) {
+                invertedPath += EDirection.RIGHT.getSymbol();
+            } else {
+                return null;
             }
         }
 
